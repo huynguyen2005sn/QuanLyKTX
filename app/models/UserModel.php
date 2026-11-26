@@ -21,5 +21,38 @@ class UserModel {
         }
         return false; // Sai tài khoản/mật khẩu hoặc lỗi query
     }
+    // Hàm Đổi mật khẩu
+    public function changePassword($user_id, $old_password, $new_password) {
+        $id = (int)$user_id;
+        $old = $this->conn->real_escape_string($old_password);
+        $new = $this->conn->real_escape_string($new_password);
+        
+        // 1. Kiểm tra mật khẩu cũ có đúng không
+        $check = $this->conn->query("SELECT id FROM tai_khoan WHERE id = $id AND mat_khau = '$old'");
+        if ($check && $check->num_rows > 0) {
+            // 2. Nếu đúng thì cập nhật mật khẩu mới
+            $this->conn->query("UPDATE tai_khoan SET mat_khau = '$new' WHERE id = $id");
+            return true;
+        }
+        return false; // Mật khẩu cũ bị sai
+    }
+    // Kiểm tra xem Tên đăng nhập và Mã sinh viên có khớp nhau không
+    public function checkUserAndMaSV($username, $ma_sv) {
+        $u = $this->conn->real_escape_string(trim($username));
+        $m = $this->conn->real_escape_string(trim($ma_sv));
+        // So khớp với cột ma_sv_lien_ket trong bảng tai_khoan
+        $sql = "SELECT id FROM tai_khoan WHERE ten_dang_nhap = '$u' AND ma_sv_lien_ket = '$m' LIMIT 1";
+        $result = $this->conn->query($sql);
+        return ($result && $result->num_rows > 0);
+    }
+
+    // Đổi mật khẩu trực tiếp (Quên mật khẩu bằng Mã SV)
+    public function updatePasswordByUsernameAndMaSV($username, $ma_sv, $new_password) {
+        $u = $this->conn->real_escape_string(trim($username));
+        $m = $this->conn->real_escape_string(trim($ma_sv));
+        $p = $this->conn->real_escape_string($new_password);
+        $sql = "UPDATE tai_khoan SET mat_khau = '$p' WHERE ten_dang_nhap = '$u' AND ma_sv_lien_ket = '$m'";
+        return $this->conn->query($sql);
+    }
 }
 ?>

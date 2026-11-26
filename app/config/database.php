@@ -3,7 +3,7 @@ class Database {
     private $host = "localhost";
     private $user = "root";
     private $pass = "";
-    private $db_name = "ql_ktx";
+    private $db_name = "ql_ktx_test2";
     public $conn;
 
     public function getConnection() {
